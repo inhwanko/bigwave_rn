@@ -3,7 +3,7 @@
 # 1. 스터디 개요
 
 **1) 일시:** KST 매주 일요일 오전 11시 ~ 오후 1시 ([Zoom 링크](https://washington.zoom.us/j/98637561547))   
-**2) 회차:** 9회차   
+**2) 회차:** 9회차 (아래 내용은 스터디 진행상황에 따라 일부 변경될 수 있음을 알려드립니다)   
 
 일시 | 제목 | 내용 | 비고
 ---- | ----- | ---- | ----
@@ -18,3 +18,12 @@
 12/6| 8. 방법론 실제 사례 분석 | 패널 데이터를 활용한 다양한 방법론 소개 (생존분석, difference-in-differences, regression discontinuity 등) |
 
 **3) 자료:** 본 Github 페이지를 통해 업로드 (PPT, 코드, 데이터 등)   
+
+
+# 2. 스터디 교재
+
+ R 통계 방법론: Kleiber & Zeileis (2008). Applied Econometrics with R.   
+ 인과관계 추론 및 선형회귀: Angrist & Pischke (2008). Mostly Harmless Econometrics: An Empiricist's Companion.    
+ 시계열 기초: Cowpertwait & Metcalfe (2009). Introductory Time Series with R.   
+ 패널 분석: Wooldridge. (2010). Econometric Analysis of Cross-Sectional and Panel Data.    
+ 최대가능도추정: Ward & Ahlquist. (2018). Maximum Likelihood for Social Science: Strategies for Analysis.    

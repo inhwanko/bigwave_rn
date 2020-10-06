@@ -7,6 +7,8 @@
 
 # Name of website
 title: 빅웨이브 연구자 네트워크 중급통계방법론 스터디
+url: "https://github.com/inhwanko"
+baseurl: ""
 
 # Your name to show in the footer
 author: Inhwan Ko
@@ -18,7 +20,6 @@ navbar-links:
   Resources:
     - Beautiful Jekyll: "https://beautifuljekyll.com"
     - Learn markdown: "https://www.markdowntutorial.com/"
-  Author's home: "https://deanattali.com"
 
 # --- Logo --- #
 

@@ -6,10 +6,10 @@
 # --- Required options --- #
 
 # Name of website
-title: My Website
+title: 빅웨이브 연구자 네트워크 중급통계방법론 스터디
 
 # Your name to show in the footer
-author: Some Person
+author: Inhwan Ko
 
 # --- List of links in the navigation bar --- #
 
@@ -39,16 +39,14 @@ round-avatar: true
 # Select the social network links that you want to show in the footer.
 # Uncomment the links you want to show and add your information to each one.
 social-network-links:
-  email: "someone@example.com"
-  facebook: deanattali
-  github: daattali
-  twitter: daattali
+  email: "inhwanko@uw.edu"
+  github: "github.com/inhwanko"
 #  reddit: yourname
 #  linkedin: daattali
 #  xing: yourname
 #  stackoverflow: "3943160/daattali"
 #  snapchat: deanat78
-#  instagram: deanat78
+  instagram: @koinan__
 #  youtube: user/deanat78
 #  spotify: yourname
 #  telephone: +14159998888
@@ -69,14 +67,12 @@ rss-description: This website is a virtual proof that I'm awesome
 
 # Select which social network share links to show in posts
 share-links-active:
-  twitter: true
   facebook: true
-  linkedin: true
-  vk: false
+  github: true
+  instagram: true
 
 # How to display the link to your website in the footer
 # Remove this if you don't want a link in the footer
-url-pretty: "https://github.com/inhwanko/bigwave_rn"
 
 # Excerpt word length - Truncate the excerpt of each post on the feed page to the specified number of words
 excerpt_length: 50
@@ -185,7 +181,7 @@ date_format: "%B %-d, %Y"
 # --- You don't need to touch anything below here (but you can if you want) --- #
 
 # Output options (more information on Jekyll's site)
-timezone: "America/Toronto"
+timezone: "Korea"
 markdown: kramdown
 highlighter: rouge
 permalink: /:year-:month-:day-:title/
@@ -228,4 +224,4 @@ plugins:
 # Beautiful Jekyll / Dean Attali
 # 2fc73a3a967e97599c9763d05e564189
 
-remote_theme : mmistakes/minimal-mistakes
+remote_theme : daattali/beautiful-jekyll

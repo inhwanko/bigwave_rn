@@ -7,7 +7,7 @@
 
 일시 | 제목 | 내용 | 비고
 ---- | ----- | ---- | ----
-10/11 | R 프로그래밍 기초 | [R](https://cloud.r-project.org/), [R Studio](https://rstudio.com/products/rstudio/download/) 및 [Markdown](http://whatismarkdown.com/) 사용법 안내 | 기존에 R을 사용해보신 분들은 참석하지 않으셔도 좋습니다.
+10/11 | R 프로그래밍 기초 | [R](https://cloud.r-project.org/), [R Studio](https://rstudio.com/products/rstudio/download/) 및 [Markdown](http://whatismarkdown.com/) 사용법 안내 | 기존에 R을 사용해보신 분들은 참석 불필요
 10/18 | 1. 인과 관계 추론 | 4가지 인과 관계에 대한 관점과 루빈 인과 모형 (Rubin Causal Model) |
 10/25 | 2. 선형회귀모형 복습 | 가설 검정, 선형 모형, BLUE의 개념과 가우스-마코프 정리 | 
 11/1 | 3. 최대가능도추정 I | 최대가능도추정의 논리, 선형 회귀와 최대가능도추정의 관계 |

@@ -1,16 +1,3 @@
-
----
-title: "Session 0"
-author: "Inhwan Ko"
-date: 'Oct 09, 2020'
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(results = "hide", warning = FALSE, message = FALSE,
-                      fig.show = "hide")
-```
-
 # 1. 알에 대하여- RRRRRRRRRRRRRRRRRRRR
 
 R은 "객체지향" 프로그래밍 툴입니다. 여기서 객체(object)란 쉽게 말해 우리가 R에서 사용하는 명령어나 데이터셋과 같은 요소들을 말합니다. R이 객체를 지향한다는 말은 R에서 사용되는 대부분의 기능들이 바로 이 R에서 사용되는 객체들을 "공통적으로" 사용하여, 새로운 기능이 나오더라도 우리가 유연하게 사용할 수 있게끔 배려한다는 말입니다.  
@@ -217,7 +204,6 @@ R 환경에서 데이터를 다운로드 하는 방법은 두 가지가 있습�
 
 - "Gapminder" 처럼 미리 준비된 패키지에서 다운로드
 - 내가 준비한 자료를 R 환경에 부착 (.dat, .pdf, .txt, .xlsx, .csv 등)
-
 
 
 

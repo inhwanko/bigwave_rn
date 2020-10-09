@@ -215,7 +215,10 @@ sum(!is.na(example))
 
 R 환경에서 데이터를 다운로드 하는 방법은 두 가지가 있습니다. 
 
-- 
+- "Gapminder" 처럼 미리 준비된 패키지에서 다운로드
+- 내가 준비한 자료를 R 환경에 부착 (.dat, .pdf, .txt, .xlsx, .csv 등)
+
+
 
 
 # 9. RMarkdown 튜토리얼

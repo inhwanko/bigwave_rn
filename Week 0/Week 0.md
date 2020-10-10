@@ -113,6 +113,25 @@ cmat[1,2]
 ```
 
 
+# 2.4. 통계 사용하기
+
+```{r}
+bernoulli <- sample(x=c(1,0), size=10, prob=c(0.7, 0.3), replace=T)
+
+binom <- vector(mode="numeric", length=10,000)
+
+for (i in 1:10,000) {
+ binom[i] <- sum(sample(x=c(1,0), size=10, prob=c(0.7, 0.3), replace=T))
+}
+
+rbinom(n=10,000, size=10, prob=.7)
+
+mean(bernoulli)
+sd(bernoulli)
+
+```
+
+
 # 3. class의 개념
 
 class란 R 환경에서 사용하는 다양한 오브젝트들의 "성격"을 말합니다. 
@@ -224,6 +243,55 @@ audit <- read_excel("audit.xlsx", sheet = 2)
 # 4.1. 데이터셋 쪼물딱(wrangle)하기- tidyverse의 등장
 
 개인적으로 데이터셋을 가지고 작업하는 것은 R에 기본적으로 깔려 있는 패키지 문법인 R Base보다도 또다른 문법 (혹은 사투리) 인 tidyverse가 더 강력하다고 생각합니다. 
+
+[Base와 Tidyverse의 차이](https://tavareshugo.github.io/data_carpentry_extras/base-r_tidyverse_equivalents/base-r_tidyverse_equivalents.html)
+
+위에서 다운받은 ```fdi``` 데이터셋으로 여러 가지 데이터 변환 예제를 통해 그 차이를 느껴봅시다.
+
+```{r}
+# 그 전에 변수명좀 간단하게 합시다
+
+fdi <- fdi[c(1,3,7,8),]
+colnames(fdi) <- c("year","economy","direction","USD")
+
+head(fdi)
+attach(fdi)
+
+unique(year)
+unique(economy)
+
+# 한국 (Korea, Republic of)의 1970-1987년 데이터만 보고 싶다면?
+
+## base
+korea7087 <- fdi[year==1970:1987 & economy=="Korea, Republic of", ] # 혹은
+korea7087 <- subset(fdi, year==1970:1987 & economy=="Korea, Republic of")
+
+## tidyverse
+korea7087 <- fdi %>%
+ filter(year==1970:1987 & economy=="Korea, Republic of")
+```
+
+잘 보시면 tidyverse는 ```%>%``` 라는 특이한 기호를 사용하는 걸 볼 수 있습니다. 이는 pipe operator라고 부르는 것인데요, 우리나라 어순에 맞게 "A를, B 처리 한 다음, C 처리한다" 이런 식으로 나열할 때 쓰이는 접속사 같은 것입니다. base는 대신 C처리(B(처리A를)) 이런 식으로 마지막 실행과정을 제일 처음에 놓게 되죠. 간단한 예를 들어볼까요?
+
+```{r}
+# 한국의 1970-1987년 사이 FDI 평균 유입량을 현재 가치 기준 달러액으로 보여주세요!
+
+## base R
+
+mean(fdi[year==1970:1987 & economy=="Korea, Republic of" & direction=="Inward",])
+
+# tidyverse
+`
+fdi %>%
+ filter(Year==1970:1987 & Economy=="Korea, Republic of") %>%
+ filter(Direction=="Inward")
+ mean(US dollars at current prices in millions)
+
+```
+
+보시면 각각의 장단점이 있습니다. base R은 코드가 비교적 짧은 반면, 작업 과정(workflow)을 직관적으로 이해하기는 어렵죠. 그러나 tidverse는 작업 과정이 직관적으로 그리고 자연스럽게 이어지도록 써내려가지는 반면 라인이 길어지게 됩니다. 각자의 장단점이 있으니 실제 코딩 경험을 쌓아나가시면서 적절하게 혼용하시면 되겠습니다! 저는 솔직히 두 개를 똑 구분해서 사용하지는 않습니다. 
+
+
 
 # 5. RMarkdown 튜토리얼
 

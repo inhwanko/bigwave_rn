@@ -22,19 +22,15 @@ R 프로그래밍을 사용하게 되면 이런 일이 (아주 약간의 예외�
 **Disclaimer**: 물론 R이 잘못한게 아니라 제가 잘못해서 R를 꺼버리고 플레이스테이션4를 하러 가는 일이 더 많긴 합니다. R만세.
 
 
-# 2. R과 RStudio?
+## 1.1. R과 RStudio?
 
-R에 대한 소개는 어느정도 했으니, 이제 RStudio는 또 뭔지 간단하게 소개하기로 합니다. 별거 없습니다. R을 더 간편하게 사용할 수 있게 만든 프로그램입니다. 예컨대 R 언어를 인간의 언어로 좀 알아듣기 쉽게 바꿔주는 번역기 정도랄까요.  
+R에 대한 소개는 어느정도 했으니, 이제 RStudio는 또 뭔지 간단하게 소개하기로 합니다. 별거 없습니다. R을 더 간편하게 사용할 수 있게 만든 프로그램입니다. 예컨대 R 언어를 인간의 언어로 좀 알아듣기 쉽게 바꿔주는 번역기 정도랄까요. 세션에서 여러가지 R Studio의 기능들을 소개시켜 드리겠습니다.
 
-R Studio의 기능에 대해서 간단히 알아보는 시간 갖겠습니다.  
+R의 기능에 대해서 간단히 알아보는 시간 갖겠습니다.  
 
-**alt+shift+k**  
+# 2. R 기반 기본 
 
-**ctrl+shift+H**  
-
-**ctrl+enter**  
-
-# 3. 계산기 R
+# 2.1. 계산기 R
 
 ```{r}
 2 + 3
@@ -60,7 +56,7 @@ sqrt(2 * 2)
 ```
 
 
-# 4. 변수(variables)와 배정(assignment)
+# 2.2. 변수(variables)와 배정(assignment)
 
 ```{r}
 four <- 2 + 2
@@ -75,7 +71,7 @@ four / 2 * 8 + four
 ```
 
 
-# 5. 벡터와 행렬 (읭 여기 수학시간 아닌데)
+# 2.3. 벡터와 행렬 (읭 여기 수학시간 아닌데)
 
 ```{r}
 newvec <- c(175, 188, 164, 195)
@@ -117,8 +113,9 @@ cmat[1,2]
 ```
 
 
-# 6. class의 개념
+# 3. class의 개념
 
+class란 R 환경에서 사용하는 다양한 오브젝트들의 "성격"을 말합니다. 
 
 ```{r}
 class(2)
@@ -133,9 +130,9 @@ class(cbind)
 ```
 
 
-# 7-1. 겁나 중요한 class 1- data.frame
+## 3.1. 겁나 중요한 class 1- data.frame
 
-## 잠깐, 그 전에 패키지는 뭐야?  
+### 잠깐, 그 전에 패키지는 뭐야?  
 
 
 ```{r}
@@ -165,7 +162,7 @@ gapminder$lifeExp
 unique(gapminder$continent)
 ```
 
-# 7-2. 겁나 중요한 class 2- list
+## 3.2. 겁나 중요한 class 2- list
 
 ```{r}
 list <- list(NULL)
@@ -183,7 +180,7 @@ list[[3]] <- newvec
 list
 ```
 
-# 7-3. 겁나 중요한 class 3- logical
+## 3.3. 겁나 중요한 class 3- logical
 
 ```{r}
 class(NA)
@@ -198,16 +195,37 @@ sum(!is.na(example))
 ```
 
 
-# 8. Dataset 다운로드 하기
+# 4. Dataset 다운로드 하기
 
 R 환경에서 데이터를 다운로드 하는 방법은 두 가지가 있습니다. 
 
 - "Gapminder" 처럼 미리 준비된 패키지에서 다운로드
 - 내가 준비한 자료를 R 환경에 부착 (.dat, .pdf, .txt, .xlsx, .csv 등)
 
+하드웨어에 저장된 자료를 R 환경에 부착하려면 현재 실행하고 있는 코드 파일과 해당 자료가 한 폴더 안에 있어야 하고, R 환경이 돌아가고 있는 작업 환경 (working directory)를 해당 폴더로 바꿔주어야 합니다. 작업 환경을 확인/변경하려면 다음의 코드를 실행하거나 명령어를 사용하세요.
 
+```{r}
+get.wd()
+set.wd("폴더 디렉토리") # 혹은 ctrl+shift+H
 
-# 9. RMarkdown 튜토리얼
+```
+
+Week 0 디렉토리 안에 있는 csv 파일과 xlsx 파일을 다운받아서 R 환경에 업로드해봅시다.
+
+```{r}
+fdi <- read.csv("fdi.csv")
+
+#library(readxl)
+audit <- read_excel("audit.xlsx", sheet = 2)
+```
+
+오류가 난다구요? 그 이유는 read_excel() 명령어는 별도의 패키지를 요구하기 떄문입니다. 위의 코드에서 ```#```을 지우고 패키지를 실행시킨 다음, 다시 한 번 돌려보세요.
+
+# 4.1. 데이터셋 쪼물딱(wrangle)하기- tidyverse의 등장
+
+개인적으로 데이터셋을 가지고 작업하는 것은 R에 기본적으로 깔려 있는 패키지 문법인 R Base보다도 또다른 문법 (혹은 사투리) 인 tidyverse가 더 강력하다고 생각합니다. 
+
+# 5. RMarkdown 튜토리얼
 
 RMarkdown은 쉽게 말해 R로 쓰는 Microsoft Word라고 생각하면 됩니다. 물론 Word처럼 문서 생성/편집만 할 수 있는게 아니라 PPT, HTML 페이지 등 여러가지 형태의 결과물을 만들 수 있습니다. 지금 보시고 있는 이 HTML 문서도 RMarkdown으로 만들었는데요, 지금부터는 RMarkdown을 어떻게 사용하는지 직접 실습해보기로 합니다.  
 https://gist.github.com/ihoneymon/652be052a0727ad59601 

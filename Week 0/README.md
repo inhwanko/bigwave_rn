@@ -124,7 +124,7 @@ for (i in 1:10,000) {
  binom[i] <- sum(sample(x=c(1,0), size=10, prob=c(0.7, 0.3), replace=T))
 }
 
-rbinom(n=10,000, size=10, prob=.7)
+rbinom(n=10000, size=10, prob=.7)
 
 mean(bernoulli)
 sd(bernoulli)

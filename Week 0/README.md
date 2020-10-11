@@ -118,7 +118,7 @@ cmat[1,2]
 ```{r}
 bernoulli <- sample(x=c(1,0), size=10, prob=c(0.7, 0.3), replace=T)
 
-binom <- vector(mode="numeric", length=10,000)
+binom <- vector(mode="numeric", length=10000)
 
 for (i in 1:10,000) {
  binom[i] <- sum(sample(x=c(1,0), size=10, prob=c(0.7, 0.3), replace=T))

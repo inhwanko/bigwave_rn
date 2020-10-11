@@ -120,7 +120,7 @@ bernoulli <- sample(x=c(1,0), size=10, prob=c(0.7, 0.3), replace=T)
 
 binom <- vector(mode="numeric", length=10000)
 
-for (i in 1:10,000) {
+for (i in 1:10000) {
  binom[i] <- sum(sample(x=c(1,0), size=10, prob=c(0.7, 0.3), replace=T))
 }
 
@@ -251,7 +251,7 @@ audit <- read_excel("audit.xlsx", sheet = 2)
 ```{r}
 # 그 전에 변수명좀 간단하게 합시다
 
-fdi <- fdi[c(1,3,7,8),]
+fdi <- fdi[,c(1,3,7,8)]
 colnames(fdi) <- c("year","economy","direction","USD")
 
 head(fdi)
@@ -260,15 +260,14 @@ attach(fdi)
 unique(year)
 unique(economy)
 
-# 한국 (Korea, Republic of)의 1970-1987년 데이터만 보고 싶다면?
+# 1970-1987년 데이터만 보고 싶다면?
 
 ## base
-korea7087 <- fdi[year==1970:1987 & economy=="Korea, Republic of", ] # 혹은
-korea7087 <- subset(fdi, year==1970:1987 & economy=="Korea, Republic of")
+fdi_7087 <- subset(fdi, year==1970:1987)
 
 ## tidyverse
-korea7087 <- fdi %>%
- filter(year==1970:1987 & economy=="Korea, Republic of")
+fdi_7087 <- fdi %>%
+ filter(year==1970:1987)
 ```
 
 잘 보시면 tidyverse는 ```%>%``` 라는 특이한 기호를 사용하는 걸 볼 수 있습니다. 이는 pipe operator라고 부르는 것인데요, 우리나라 어순에 맞게 "A를, B 처리 한 다음, C 처리한다" 이런 식으로 나열할 때 쓰이는 접속사 같은 것입니다. base는 대신 C처리(B(처리A를)) 이런 식으로 마지막 실행과정을 제일 처음에 놓게 되죠. 간단한 예를 들어볼까요?
@@ -278,14 +277,6 @@ korea7087 <- fdi %>%
 
 ## base R
 
-mean(fdi[year==1970:1987 & economy=="Korea, Republic of" & direction=="Inward",])
-
-# tidyverse
-`
-fdi %>%
- filter(Year==1970:1987 & Economy=="Korea, Republic of") %>%
- filter(Direction=="Inward")
- mean(US dollars at current prices in millions)
 
 ```
 

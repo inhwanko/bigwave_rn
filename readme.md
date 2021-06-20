@@ -9,7 +9,7 @@
 **3) 참가비:** 5만원 (빅웨이브 공식 개인사업좌 계좌를 이용하여 과세 등 집행 내역을 투명하게 공개합니다)  
 
 일시 | 제목 | 내용
----- | -=-- | -=--
+---- | ---- | ----
 7/3 (오후 1시) | 오리엔테이션 & R 프로그래밍 기초 | [R](https://cloud.r-project.org/), [R Studio](https://rstudio.com/products/rstudio/download/) 및 [Markdown](http://whatismarkdown.com/) 사용법 안내 
 7/8 | 연구 패러다임: 양적 vs 질적 연구 방법론 | 양적 및 질적 연구 방법론의 차이와 상호 보완성
 7/15 | 양적연구방법 1. 관찰연구에서의 인과관계 추론 | Rubin 인과 모형의 소개와 응용 ([Winship & Morgan 1999](http://nrs.harvard.edu/urn-3:HUL.InstRepos:3200609))

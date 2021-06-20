@@ -1,0 +1,371 @@
+---
+title: "Week 4"
+author: "Inhwan Ko"
+date: 'Nov 15, 2020'
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+rm(list=ls())
+#install.packages(c("MASS","ggplot2","tidyverse"))
+
+library(MASS) 
+library(ggplot2)
+library(tidyverse)
+
+#URL_tile <- c("https://faculty.washington.edu/cadolph/software/tile_0.4.14.tar.gz")
+#URL_simcf <- c("https://faculty.washington.edu/cadolph/software/simcf_0.2.17.tar.gz")
+#install.packages(URL_tile, repos = NULL, type="source")
+#install.packages(URL_simcf, repos = NULL, type="source")
+
+library(simcf)
+library(tile)
+
+```
+
+
+## Normal MLE
+
+Let's say our dependent variable, $y_i$, follows this Normal distribution:
+
+$$
+y_i \sim f_\mathcal{N}(\mu_i, \sigma^2)
+$$
+
+with a mean $\mu_i$ defined by the linear equation of covariate matrix, $\mathbf{x}_i$, multiplied by the coefficient matrix, $\beta$:
+
+$$
+\mu_i = \mathbf{x}_i\beta
+$$
+
+This is called homoskedastic Normal distribution. However, if we allow the variance to vary across observations, say:
+
+$$
+y_i \sim f_\mathcal{N}(\mu_i, \sigma^2_i)
+$$
+
+when we define both parameters as:
+
+$$
+\mu_i = \mathbf{x}_i\beta, \ \ \sigma^2_i = \mathbb{exp}(\mathbf{x_i}\gamma)
+$$
+
+this is now heteroskedastic Normal, which we cannot model with OLS assumptions. The MLE for the heteroskedastic Normal should be:
+
+$$
+\begin{aligned} 
+\mathrm{P}\left(\mathbf{y} | \boldsymbol{\mu}, \boldsymbol{\sigma}^{2}\right) &=\prod_{i=1}^{n} f_{\mathcal{N}}\left(y_{i} | \mu_{i}, \sigma_{i}^{2}\right) & \scriptsize[\text{Joint probability}] \\
+\mathrm{P}\left(\mathbf{y} | \boldsymbol{\mu}, \boldsymbol{\sigma}^{2}\right) &=\prod_{i=1}^{n}\left(2 \pi \sigma_{i}^{2}\right)^{-1 / 2} \exp \left[\frac{-\left(y_{i}-\mu_{i}\right)^{2}}{2 \sigma_{i}^{2}}\right] & \scriptsize[\text{Expressed in Normal distribution}]\\ 
+\log \mathcal{L}\left(\boldsymbol{\beta}, \boldsymbol{\sigma}^{2} | \mathbf{y}\right) & \propto-\frac{1}{2} \sum_{i=1}^{n} \log \sigma_{i}^{2}-\frac{1}{2} \sum_{i=1}^{n} \frac{\left(y_{i}-\mathbf{x}_{i} \boldsymbol{\beta}\right)^{2}}{\sigma_{i}^{2}} & \scriptsize[\text{Converted to log likelihood; simplify}] \\ 
+\log \mathcal{L}(\boldsymbol{\beta}, \boldsymbol{\gamma} | \mathbf{y}) & \propto-\frac{1}{2} \sum_{i=1}^{n} \log \mathbf{z}_{i} \gamma-\frac{1}{2} \sum_{i=1}^{n} \frac{\left(y_{i}-\mathbf{x}_{i} \boldsymbol{\beta}\right)^{2}}{\exp \left(\mathbf{x}_{i} \gamma\right)} & \scriptsize[\text{Substitute in systematic components}]
+\end{aligned}
+$$
+
+Let's try to simulate the heteroskedastic Normal data and fit with both the OLS and MLE. 
+
+$$
+\begin{aligned}
+y_i & \sim f_\mathcal{N}(\mu_i, \sigma^2_i) \\ 
+\mu_i & = 0 + 5x_{1i} + 15x_{2i}\\
+\sigma^2_i & = \mathbb{exp}(1+0x_{1i}+3x_{2i}) 
+\end{aligned}
+$$
+
+### Set up the variables
+
+```{r}
+set.seed(2020)
+n <- 1000
+
+y <- x0 <- x1 <- x2 <- vector(mode="numeric", 1000)
+x0 <- rep(1, n)
+x1 <- runif(n, min=0, max=1)
+x2 <- runif(n, min=0, max=1)
+
+x <- cbind(x0,x1,x2)
+
+beta <- c(0,5,15)
+gamma <- c(1,0,3)
+
+```
+
+### Create y variables according to our model
+
+```{r}
+mu <- x %*% beta
+sigma2 <- exp(x %*% gamma)
+
+y <- rnorm(n, 
+           mean=mu, sd=sqrt(sigma2))
+
+data <- cbind(y,x1,x2) %>% as_tibble
+
+```
+
+
+Let's plot the $y_i$ over $x_{2i}$. 
+
+```{r}
+col <- RColorBrewer::brewer.pal(6, "Set2")
+
+true <- ggplot(data, aes(x2, y)) +
+  geom_point(color=col[1]) +
+  theme(legend.position = "none")
+
+true
+```
+
+What happens if we use OLS for this data?
+
+```{r}
+lm <- lm(y ~ x1 + x2, data=data)
+summary(lm)
+```
+
+What if we use MLE?
+
+
+```{r}
+llk.hetnormlin <- function(param, y, x, z) {
+  x <- as.matrix(x)		                 # x (some covariates) as a matrix
+  z <- as.matrix(z)		                 # z (some covariates) as a matrix
+  os <- rep(1, nrow(x)) 	             # Set the intercept as 1 (constant)
+  x <- cbind(os, x)		                 # Add intercept to covariates x
+  z <- cbind(os, z)                      # Add intercept to covariates z
+  
+  b <- param[1 : ncol(x)]                         # Parameters for x
+  g <- param[(ncol(x) + 1) : (ncol(x) + ncol(z))] # Parameters for z
+  
+  xb <- x %*% b                          # Systematic components for mean
+  s2 <- exp(z %*% g)                     # Systematic components for variance
+  
+  sum(0.5 * (log(s2) + (y - xb)^2 / s2)) # Likelihood we want to maximize 
+                                         # optim is a minimizer by default
+                                         # To maximize lnL is to minimize -lnL
+                                         # so the +/- signs are reversed
+}
+```
+
+```{r}
+stval <- c(0, 0, 0, 0, 0, 0)
+
+xcovariate <- cbind(x1,x2)
+
+# Run ML, and get the output we need
+hetnorm.result <- optim(stval,           # Initial guesses
+                        llk.hetnormlin,  # Likelihood function
+                        method = "BFGS", # Gradient method
+                        hessian = TRUE,  # Return Hessian matrix
+                        y = y,           # Outcome variable
+                        x = xcovariate, # Covariates x (w/o constant)
+                        z = xcovariate  # Covariates z (w/o constant)
+                        ) 
+```
+
+```{r}
+pe <- hetnorm.result$par            # Point estimates
+round(pe, 3)
+
+vc <- solve(hetnorm.result$hessian) # Var-cov matrix (for computing s.e.)
+round(vc, 5)
+
+se <- sqrt(diag(vc))                # To compute standard errors (s.e.)
+                                    # take the diagonal of the Hessian; 
+                                    # then take square root
+round(se, 3)
+```
+
+Comparison between MLE and OLS? Let's show with a ladderplot:
+
+```{r}
+lm_coef <- c(summary(lm)$coefficients[,1], rep(NA,3))
+lm_se <- c(summary(lm)$coefficients[,2], rep(NA,3))
+mle_coef <- round(pe,3)
+mle_se <- round(se,3)
+true_coef <- c(0,5,15,1,0,3)
+
+lm_lower <- lm_coef+lm_se*-1.96
+mle_lower <- mle_coef+mle_se*-1.96
+lm_upper <- lm_coef+lm_se*1.96
+mle_upper <- mle_coef+mle_se*1.96
+
+pe_all <- c(lm_coef,mle_coef,true_coef)
+pe_all <- pe_all[c(1,7,13,2,8,14,3,9,15,4,10,16,5,11,17,6,12,18)]
+
+lower_all <- c(lm_lower,mle_lower,true_coef)
+lower_all <- lower_all[c(1,7,13,2,8,14,3,9,15,4,10,16,5,11,17,6,12,18)]
+
+upper_all <- c(lm_upper,mle_upper,true_coef)
+upper_all <- upper_all[c(1,7,13,2,8,14,3,9,15,4,10,16,5,11,17,6,12,18)]
+
+result <- data.frame(label = c("OLS b0", "MLE b0", "True b0",
+                               "OLS b1", "MLE b1", "True b1",
+                               "OLS b2", "MLE b2", "True b2",
+                               "OLS r0", "MLE r0", "True r0",
+                               "OLS r1", "MLE r1", "True r1",
+                               "OLS r2", "MLE r2", "True r2"),
+                       pe = pe_all, lower = lower_all, upper = upper_all)
+
+
+B012 <- ropeladder(x=result[1:9,]$pe, lower=result[1:9,]$lower, upper=result[1:9,]$upper,
+                     labels = c("OLS b0", "MLE b0", "True b0",
+                               "OLS b1", "MLE b1", "True b1",
+                               "OLS b2", "MLE b2", "True b2"),
+                     size=0.65,
+                     lex=1.75,
+                     lineend="square", plot=1, col=col[c(1:3)])
+
+R012 <- ropeladder(x=result[10:18,]$pe, lower=result[10:18,]$lower, upper=result[10:18,]$upper,
+                     labels = c("OLS r0", "MLE r0", "True r0",
+                               "OLS r1", "MLE r1", "True r1",
+                               "OLS r2", "MLE r2", "True r2"),
+                     size=0.65,
+                     lex=1.75,
+                     lineend="square", plot=2, col=col[c(4:6)])
+                               
+# Make reference line trace for first diffs (at 0)
+line1 <- linesTile(x=c(0,0), y=c(0,1), plot=1)
+line2 <- linesTile(x=c(0,0), y=c(0,1), plot=2)
+
+# Set tick marks for x axis
+xat <- c(0,5,10,15)
+xlab <- c(0,5,10,15)
+
+tile(B012, R012, line1, line2,
+     plottitle=list(labels="Differences in coefs and 95% intervals"),
+     xaxistitle=list(labels="Coefficients (Estimates / Parameters)"),
+     width=list(null=5),
+     height=list(plottitle=6, xaxistitle=5),
+     gridlines=list(type="xt"))
+
+```
+
+Finally, let's compare the prediction result between OLS and MLE:
+
+```{r}
+# Linear regression prediction
+lm_predict <- predict(lm, data)
+
+mu_sim <- x %*% pe[1:3]
+sigma_sim <- exp(x %*% pe[4:6])
+sd_sim <- sqrt(sigma_sim)
+
+mle_predict <- rnorm(1000, mu_sim, sd_sim)
+
+plotdata <- data.frame(x1=x1, x2=x2,
+                       lm_predict=lm_predict,
+                       mle_predict=mle_predict)
+
+lm_plot <- ggplot(plotdata, aes(x2, lm_predict)) +
+  geom_point(color=col[3])
+
+mle_plot <- ggplot(plotdata, aes(x2, mle_predict)) +
+  geom_point(color=col[5]) +
+  theme(legend.position="none")
+
+
+final <- ggpubr::ggarrange(true, lm_plot, mle_plot,
+                           labels=c("True plot", "LM predictions", "MLE predictions"),
+                           ncol=3, nrow=1)
+
+
+final
+```
+
+
+## GLM vs MLE logit
+
+Technically, GLM fits a logit model with MLE methods. The basic difference between the linear and logit model is the existence of an error term:
+
+$$
+y_i \sim f_{Bern}(\pi_i) \\
+\pi_i = \mathbb{logit}^{-1}(X_i\beta) = \frac{e^{X_i\beta}}{1+e^{X_i\beta}} = \frac{1}{1+e^{-X_i\beta}}
+$$
+
+The MLE for the logit model is as follows:
+
+$$
+\begin{aligned}
+\mathcal{L}(\pi|\mathbb{y}) & \propto \prod^n_{i=1}\pi_i^{y_i}(1-\pi_i)^{1-y_i} \\
+\mathcal{L}(\beta|\mathbb{y}) & \propto \prod^n_{i=1}(\frac{1}{1+\mathbb{exp}(-\mathbb{x}_i\beta)})^{y_i}(1-\frac{1}{1+\mathbb{exp}(-\mathbb{x}_i\beta)})^{1-y_i} \\
+\mathcal{L}(\beta|\mathbb{y}) & \propto \prod^n_{i=1}(1+\mathbb{exp}(-\mathbb{x}_i\beta))^{-y_i}(1+\mathbb{exp}(\mathbb{x}_i\beta))^{-(1-y_i)} \\
+\mathbb{log}\mathcal{L}(\beta|\mathbb{y}) & \propto \sum^n_{i=1}y_i\mathbb{log}(1+\mathbb{exp}(-\mathbb{x}_i\beta))-(1-y_i)\mathbb{log}(1+\mathbb{exp{(\mathbb{x}_i\beta)}})
+\end{aligned}
+$$
+
+Let's just compare the results between GLM and MLE. Let's say we have a true model of a Bernoulli random variable which is:
+
+$$
+\pi_i = \mathbb{logit}^{-1}(0.5 + x_{1i} +1.5x_{2_i}) = \frac{e^{X_i\beta}}{1+e^{X_i\beta}} = \frac{1}{1+e^{-X_i\beta}}
+$$
+
+```{r}
+n <- 1000
+x1 <- runif(n, 0, 1)
+x2 <- runif(n, 0, 1)
+y <- pi <- vector(mode="numeric", length=n)
+
+# rbernoulli(1, 0.5)
+
+for (i in 1:n) {
+  xb <- 0.5 + x1[i] + 1.5*x2[i]
+  pi[i] <- 1 / (1+exp(-xb))
+  y[i] <- rbernoulli(1, pi[i])
+}
+
+sum(y)/length(y)
+
+```
+
+Let's fit the model with ```glm()```
+
+```{r}
+glm <- glm(y ~ x1 + x2, family="binomial")
+
+summary(glm)
+
+```
+
+What about MLE?
+
+```{r}
+llk.logit <- function(param,y,x) {
+  os <- rep(1,length(x[,1]))
+  x <- cbind(os,x)
+  b <- param[ 1 : ncol(x) ]
+  xb <- x%*%b
+  sum( y*log(1+exp(-xb)) + (1-y)*log(1+exp(xb)));
+               # optim is a minimizer, so min -ln L(param|y)
+}
+
+stval <- glm$coefficients
+
+xcovariates <- cbind(x1, x2)
+
+mle_logit <- optim(stval,
+                          llk.logit,
+                          method="BFGS",
+                          hessian=TRUE,
+                          y=y,
+                          x=xcovariates)
+```
+
+```{r}
+pe_2 <- mle_logit$par
+se_2 <- sqrt(diag(solve(mle_logit$hessian)))
+
+results_logit <- rbind(pe_2, se_2,
+                       summary(glm)$coefficients[,1],
+                       summary(glm)$coefficients[,2])
+rownames(results_logit) <- c("Optim coefficients", "Optim SE", "GLM coefficients", "GLM SE")
+
+results_logit %>% knitr::kable()
+```
+
+They are just same! What a surprise!
+
+
+
+

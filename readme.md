@@ -10,7 +10,7 @@
 
 일시 | 제목 | 내용
 ---- | ---- | ----
-7/3 (오후 1시) | 오리엔테이션 & R 프로그래밍 기초 | [R](https://cloud.r-project.org/), [R Studio](https://rstudio.com/products/rstudio/download/) 및 [Markdown](http://whatismarkdown.com/) 사용법 안내 
+7/3 (1:00PM) | 오리엔테이션 & R 프로그래밍 기초 | [R](https://cloud.r-project.org/), [R Studio](https://rstudio.com/products/rstudio/download/) 및 [Markdown](http://whatismarkdown.com/) 사용법 안내 
 7/8 | 연구 패러다임: 양적 vs 질적 연구 방법론 | 양적 및 질적 연구 방법론의 차이와 상호 보완성
 7/15 | 양적연구방법 1. 관찰연구에서의 인과관계 추론 | Rubin 인과 모형의 소개와 응용 ([Winship & Morgan 1999](http://nrs.harvard.edu/urn-3:HUL.InstRepos:3200609))
 7/22 | 양적연구방법 2. 통계 이론 기초와 가설 검정 | 선형회귀를 이용한 연구 가설의 통계적 가설 검정

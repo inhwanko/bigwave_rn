@@ -33,3 +33,4 @@
 # 3. 참가 신청  
 
 구글 폼 작성 ([링크](https://forms.gle/4fjYZrafvis5U3CD7))
+문의: inhwanko at uw dot edu

@@ -1,0 +1,574 @@
+---
+title: 'BRN Research Methods Workshop 2'
+subtitle: 2. Probability and Statistical Theory
+author: Inhwan Ko (Univ. of Washington, Seattle)
+date: "July 22th, 2021"
+classoption: xcolor=dvipsnames
+output: 
+  beamer_presentation: 
+    fig_width: 6
+    fig_height: 4
+    colortheme: dolphin
+    fonttheme: professionalfonts
+    includes:
+      in_header: header.tex
+    theme: Boadilla
+keep_tex: true
+---
+
+```{r setup, include=FALSE}
+# tinytex::tlmgr_update()
+# tinytex:::install_prebuilt()
+options(tinytex.verbose = TRUE)
+```
+
+# Contents
+
+1. A Fundamental Problem to Causal Identification- Review \newline
+2. Probability Theory 
+ - Law of Large Numbers
+ - Central Limit Theorem \newline
+3. Statistical Theory
+ - Hypothesis Testing \newline
+4. Introduction to Linear Regression
+
+
+# 1. A Fundamental Problem to Causal Identification- Review
+
+\footnotesize
+
+$$
+\bar{Y}_{i \in T}^t - \bar{Y}_{i \in C}^c =  [\textcolor{seagreen}{ATE}] + [\textcolor{amber}{\textrm{baseline difference}}] + (1-w) [\textcolor{steelblue}{\textrm{heterogenous treatment}}]
+$$
+
+1) Baseline difference occurs because the potential outcome without treatment can be different between the treatment and control groups. For instance, smokers may already have higher level of stress than non-smokers even if they did smoke from the first place. This is also called *pre-treatment bias*.\newline 
+
+2) Heterogenous treatment can be produced because the treatment can interact with unobservable factors that are different between the treatment and control groups. For instance, if smokers have already higher level of stress than non-smokers, smoking makes stress level even higher and therefore further worsen their health status than it would worsen the health status of the non-smokers should they smoke. This is also called *post-treatment bias*.
+
+# 1. A Fundamental Problem to Causal Identification- Review
+
+Observation studies often use several control variables to reduce the bias of their SATE of interest. However, this is not a simple task.\newline
+
+Let $z$ be a stress level which we will use as a control variable. If:\newline
+
+\footnotesize
+1) $z$ both affects the treatment assignment and the observed outcome, then controlling for it mitigates *pre-treatment bias*. In this case, $z$ is called a *confounder*.\newline
+
+2) $z$ affects the observed outcome but also is affected by the treatment assignment, then controlling for it exacerbates *post-treatment bias.* In this case, $z$ is called a *collider*.\newline
+
+\normalsize
+Conclusion: Controlling for covariates is not always good!
+
+# 1. A Fundamental Problem to Causal Identification- Review
+
+\footnotesize
+- Random sampling matters less for estimating ATE\newline
+- Random treatment assignment is crucial; no correlation between treatment assignment and potential outcome is a sufficient condition for SATE to be a consistent estimator of ATE\newline
+- Controlling for covariates helps mitigate pre-treatment bias, but may worsen post-treatment bias\newline
+- Must have a good reason when controlling for covariates
+
+# 1.1. SATE to ATE: Probabilitical and statistical perspective
+\footnotesize
+Last week, what we've covered is an "econometric" perspective on a fundamental problem to causal identification. There's also a "statistical" perspective which we will cover today. \newline
+
+Key question: How to infer ATE (average treatment effect) from SATE (sample average treatment effect)?\newline
+
+Econometrician: Make treatment assignment uncorrelated with potential outcome (i.e., random treatment assignment).\newline
+
+Statistician: Make sample as large as possible.\newline
+
+cf) [Josh Angrist: What's the Difference between Econometrics and Statistics?](https://www.youtube.com/watch?v=uVrr_-UUgWk)
+
+# 1.1. SATE to ATE: Probabilitical and statistical perspective (cont.)
+
+Econometricians are interested in "causal inference"- causal relationship between X and Y- using the logic of *counterfactual.*\newline
+
+Statisticans are interested in "statistical inference"- association between X and Y at a population level through sample- using the logic of *Neo-humean Regularity.*\newline
+
+This is why p-value should not be read as "explanatory power" or "causal effect"- they only tell us how confidence we are with this "statistical inference," not "causal inference."
+
+# 2. Probability theory
+
+In econometric perspective, the quantity of interest (QoI) was the treatment effect- which was calculated by the potential outcome given treatment minus the potential outcome given no treatment.\newline
+
+$$
+\hat{\bar{\delta}} = \bar{Y}_{i \in T}^t - \bar{Y}_{i \in C}^c
+$$
+
+In probabilistic / statistical perspective, the quantity of interest (QoI) is the same, but instead calculated by the conditional mean of Y given X.\newline
+
+$$
+\hat{\bar{\delta}} = E(Y|X)
+$$
+
+This can be generalized into cases where X is not only dichotomous but also continuous variable. 
+
+# 2.1. Can SATE be ATE? Revisited
+
+Since we are using sample not population data, "can SATE be ATE?" type of question also holds in the statistics setting.\newline
+
+In econometric perspective, two sufficient conditions were $\textcolor{amber}{\bar{Y}_{i \in T}^t = \bar{Y}_{i \in C}^t}$ *and* $\textcolor{seagreen}{\bar{Y}_{i \in C}^c = \bar{Y}_{i \in T}^c}$.\newline
+
+In probabilistic (or frequentist) perspective, we need two theorems: (1) Law of Large Number and (2) Central Limit Theorem.
+
+
+# 2.2. Law of Large Numbers
+\scriptsize 
+
+Let $p$ be a probability of an event $A$. When an event $A$ occurs $r$ times out of $n$ times of independent trials, for any real number $\epsilon > 0$:
+
+$$lim_{n\rightarrow \infty}P(|\frac{r}{n}-p|>\epsilon)=0$$ 
+
+For instance, even though you (mathmatically) know that the probability of having 2 heads out of 3 coins is:
+
+$$_3\text{C}_2(\frac{1}{2})^2(\frac{1}{2})^1 = \frac{3}{8}$$
+
+But there is a chance that you will *always* have two heads when you throw coins only 10 times.\newline
+
+When you throw it, let say 100,000,000 times, the probability will converge into $\frac{3}{8}$. 
+
+# 2.3. Central Limit Theorem 
+\footnotesize
+Let's say your sample size is $n$. Or, you took $n$ observations ($X_1, X_2, ..., X_n$) from the population and calculated its mean ($\bar{X}$).\newline
+
+You do this $k$ times for the same sample size $n$. Therefore, you'll have: $\bar{X_1}, \bar{X_2}, ..., \bar{X_k}$. \newline
+
+The probability distribution of $\bar{X_k}$ converges into *normal distribution* as $n\rightarrow\infty$.\newline
+
+There is a lot versions of its proof online, so search for it if you are more interested in!\newline
+
+This time I will execute the theorem with multiple simulations.
+
+
+# 2.3. Central Limit Theorm (cont.)
+
+\scriptsize
+Let's generate population data with 10,000 observations, which follow binomial distribution with a true probability of 0.3 with the size of 10. For instance, assume there are 10,000 batters in the world with the batting average of 0.3, and you observed how many hits they produce for each 10 times of hitting opportunity. Assign this to an object called "pop".
+
+```{r}
+library(MASS)
+set.seed(2021)
+
+pop <- rbinom(10000, 10, 0.3)
+pop[1:10]
+
+```
+Let's take $n$ observations from the population $k$ times and make this a new function. 
+
+```{r}
+samplemean <- NULL
+
+clt <- function(n, k){
+  for (i in 1:k) {
+  samplemean[i] <- mean(sample(pop, n, replace=T))
+  }
+  return(samplemean)
+}
+
+```
+
+# 2.3. Central Limit Theorm (cont.)
+
+```{r}
+hist(pop, breaks=100)
+```
+
+When the sample size gets larger, the sampling distribution looks a lot like a normal distribution. 
+
+# 2.3. Central Limit Theorem (cont.)
+\scriptsize
+
+10 observations: does it look like a normal distribution?
+```{r}
+hist(clt(10,1000), breaks=100)
+```
+
+# 2.3. Central Limit Theorem (cont.)
+\scriptsize
+
+20 observations: what about now?
+```{r}
+hist(clt(10,1000), breaks=100)
+```
+
+# 2.3. Central Limit Theorem (cont.)
+\scriptsize
+
+30 observations?
+```{r}
+hist(clt(30,1000), breaks=100)
+```
+
+# 2.3. Central Limit Theorem (cont.)
+\scriptsize
+
+100 observations: any difference from 30 observations?
+```{r}
+hist(clt(100,1000), breaks=100)
+```
+
+# 2.3. Central Limit Theorem (cont.)
+\scriptsize
+
+1000 observations: how about now then?
+```{r}
+hist(clt(1000,1000), breaks=100)
+```
+
+# 2.3. Central Limit Theorem (cont.)
+
+Central Limit Theorem (CLT): The sample mean of any population with mean of $\mu$ and variance of $\sigma$ follows $N(\mu, \frac{\sigma^2}{n})$ approximately when its sample size $n$ approaches $\infty$. This distribution is called sampling distribution. \newline
+
+Also, an additional random variable $Z=\frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{n}}}$, follows $N(0, 1)$ approximately when its sample size $n$ approaches $\infty$. \newline
+
+We use the latter theorem more often when conducting a hypothesis testing.
+
+# 2.3. Central Limit Theorem (cont.)
+\scriptsize
+
+```{r}
+clt <- clt(1000,1000)
+mean(clt)
+sd(clt)^2
+sd(pop)^2/1000
+```
+
+# 3. Statistical theory
+\scriptsize
+
+Because we can estimate population mean and its variance only with our sample (better if our sample is large enough),\newline
+
+we know whether (and under what probability) the probability distribution function (PDF) of the sample mean contains a certain value.\newline
+
+1. If a certain value is zero, this is our null hypothesis ($H_0:\bar{X}=0$), and we are conducting one sample test.\newline
+2. If a certain value is another sample mean, this is our null hypothesis $H_0:\bar{X_1}=\bar{X_2}$, and we are conducting two sample test. \newline
+
+We reject the null hypothesis if, under the null hypothesis, the probability of such a value as that which was actually observed (p-value) is less than or equal to a small, fixed pre-defined threshold value $\alpha$, which is the level of significance. \newline
+
+# 3.1. Hypothesis Testing- One-Sample Test
+\scriptsize
+```{r}
+
+sample <- sample(pop, 100)
+mean(pop)
+mean(sample)
+
+t.test(sample)
+
+```
+
+# 3.2. Hypothesis Testing- Two-Sample Test
+\scriptsize
+```{r}
+
+sample1 <- sample(pop, 100)
+sample2 <- sample(rbinom(10000, 10, 0.4), 100)
+
+t.test(sample1, sample2)
+
+```
+
+# 3.3. A Pitfall of P-value
+\scriptsize
+In various academic disciplines, p-value is now considered a great source of misreporting a finding of an empirical study: \newline
+
+https://amstat.tandfonline.com/doi/pdf/10.1080/00031305.2016.1154108
+
+A few takeaways from the article:\newline
+
+1. By itself, p-value does not tell us anything about the size of the effect of interest. Researchers should bring as much contextual evidence as possible to buttress the claim.\newline
+
+2. A certain threshold (i.e. p>0.05) should not be taken for granted without any reference to the research design or the format of null hypothesis- the p-value can change even without any substantial change to the data or claims but only with those two above (so called p-hacking). 
+
+# 4. Linear Regression
+
+The main reason for conducting linear regression is to find out the coefficient, which is basically a conditional mean of X given Y.\newline
+
+We test whether this conditional mean is equal to zero (one-sample, two-tailed test). This is the reason we look at p-value anyways!\newline
+
+But, as explained earlier, be careful of interpreting the p-value of coefficients. 
+
+# 4.1. Linear Regression in Scalar Form
+
+Linear regression in scalar form is:
+
+$$
+y_i = \beta_0 + \beta_1x_{1i} + \beta_2x_{i2} + ... + \beta_kx_{ki} + \varepsilon_i
+$$
+
+where $\epsilon \sim N(o,\sigma^2)$. This is our stochastic component. There should be no correlation between errors ($\mathbb{E}(\epsilon_i \times \epsilon_j)=0$ for all $i \neq j$).\newline
+
+Meanwhile, our systematic component writes:
+
+$$
+\mathbb{E}(y_i) = \beta_0 + \beta_1x_{1i} + \beta_2x_{i2} + ... + \beta_kx_{ki}
+$$
+
+# 4.2. Standard Error of the Regression
+\scriptsize
+
+The variance of our error terms, $\sigma^2$, can be written as:
+
+$$
+\begin{aligned}
+\sigma^2 & = \mathbb{E}((\varepsilon_i - \mathbb{E}(\varepsilon_i))^2)\\
+& = \mathbb{E}((\varepsilon_i - 0)^2)\\
+& = \mathbb{E}(\varepsilon_i^2)\\
+& = \frac{1}{n}\sum^n_{i=1}\varepsilon_i^2\\
+& = \frac{1}{n}RSS
+\end{aligned}
+$$
+where RSS is the residual sum of squares. This is referred to as the standard error of the regression. 
+
+# 4.3. Square Root of the Mean of the Squared Errors (RMSE)
+\scriptsize
+
+Also note that:
+
+$$
+\sigma = \sqrt{\frac{1}{n}\sum^n_{i=1}\varepsilon_i^2}
+$$
+
+which is the square root of the mean of the squared errors (RMSE). This is how much we expect our observation ($y_i$) to differ from its expected value ($\mathbb{E}(y_i)$), or our systematic component of the regression. 
+
+# 4.4. Linear Regression in Matrix Form
+
+Linear regression in matrix form is:
+
+$$
+Y = X \beta + \mathbb{\epsilon}
+$$
+
+which can be expanded as below:
+
+$$
+\begin{bmatrix}
+y_1 \\
+y_2 \\
+\vdots \\
+y_n
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & x_{11} & x_{12} & \cdots & x_{1k} \\
+1 & x_{21} & x_{22} & \cdots & x_{2k} \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+1 & x_{n1} & x_{n2} & \cdots & x_{nk} \\
+\end{bmatrix}
+\begin{bmatrix}
+\beta_1 \\
+\beta_2 \\
+\vdots \\
+\beta_k
+\end{bmatrix}
++
+\begin{bmatrix}
+\varepsilon_1 \\
+\varepsilon_2 \\
+\vdots \\
+\varepsilon_n
+\end{bmatrix}
+$$
+
+# 4.5. Vector of Stochastic Components
+
+Note that we now have a vector of error terms, whose expectation is still zero:
+
+$$
+\mathbb{E}(\mathbb{\epsilon})
+=
+\begin{bmatrix}
+\mathbb{E}(\varepsilon_1) \\
+\mathbb{E}(\varepsilon_2) \\
+\vdots \\
+\mathbb{E}(\varepsilon_n)
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\
+0 \\
+\vdots \\
+0
+\end{bmatrix}
+$$
+
+
+# 4.6. Variance-Covarance Matrix (V-Cov)
+\scriptsize
+Now I introduce (perhaps) the most important concept in matrix linear regression: variance-covariance matrix. It is a $n\times n$ matrix filled with variance and covariances of error terms.
+
+$$
+\begin{aligned}
+\Sigma 
+&=
+\begin{bmatrix}
+\text{var}(\varepsilon_1) & \text{cov}(\varepsilon_1,\varepsilon_2) & \cdots & \text{cov}(\varepsilon_1,\varepsilon_n) \\
+\text{cov}(\varepsilon_2, \varepsilon_1) & \text{var}(\varepsilon_2) & \cdots & \text{cov}(\varepsilon_2,\varepsilon_n) \\
+\vdots & \vdots & \ddots & \vdots \\
+\text{cov}(\varepsilon_n, \varepsilon_1) & \text{cov}(\varepsilon_n, \varepsilon_2) & \cdots & \text{var}(\varepsilon_n) \\
+\end{bmatrix}\\
+&=
+\begin{bmatrix}
+\mathbb{E}(\varepsilon_1^2) & \mathbb{E}(\varepsilon_1\varepsilon_2) & \cdots & \mathbb{E}(\varepsilon_1\varepsilon_n) \\
+\mathbb{E}(\varepsilon_2 \varepsilon_1) & \mathbb{E}(\varepsilon_2^2) & \cdots & \mathbb{E}(\varepsilon_2\varepsilon_n) \\
+\vdots & \vdots & \ddots & \vdots \\
+\mathbb{E}(\varepsilon_n \varepsilon_1) & \mathbb{E}(\varepsilon_n \varepsilon_2) & \cdots & \mathbb{E}(\varepsilon_n^2) \\
+\end{bmatrix}
+\end{aligned}
+$$
+
+which can be reduced into:
+
+$$
+\Sigma = \mathbb{E}(\mathbb{\epsilon}\mathbb{\epsilon}')
+$$
+
+where $\mathbb{\epsilon}'$ is a transpose of $\mathbb{\epsilon}$.
+
+
+# 4.6. Variance-Covarance Matrix (V-Cov) (cont.)
+
+Note that when the assumption $\mathbb{E}(\epsilon_i \epsilon_j)=0$ for all $i\neq j$ holds, $\Sigma$ will look like:
+
+$$
+\Sigma 
+=
+\begin{bmatrix}
+\sigma^2 & 0 & \cdots & 0 \\
+0 & \sigma^2  & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & \sigma^2 \\
+\end{bmatrix}
+=\sigma^2\textbf{I}
+$$
+
+# 4.7. Beta Coefficient
+
+We want to obtain the value for $\beta$ which minimizes the residual sum of squares, hence this method being named after "least squares". Formally:
+
+$$
+\underset{\beta}{\text{arg min}} \sum^n_{i=1}\epsilon^2_i = \underset{\beta}{\text{arg min}}  \ \epsilon'\epsilon
+$$
+
+Although we will not derive the whole process, it is known that $\beta$ can be shortened as:
+
+$$
+\hat{\beta} = (X'X)^{-1}X'Y
+$$
+This is our least squares estimator for true $\beta$.
+
+# 4.7. Beta Coefficient (cont.)
+\footnotesize
+Finally, we will conclude by emphasizing the importance of sample size in statistical analysis. But I will also show why the sample size is not a great concern for econometricians.\newline
+
+Assume that this is a true model for two independent variables, X, Z, and a dependent variable, Y.
+
+$$
+Y = 1 + 0.5X + 0.3Z + \varepsilon
+$$
+
+Where X and Z both follow a normal distribution:
+
+```{r}
+x <- rnorm(10000, 5, 3)
+z <- rnorm(10000, 3, 5)
+e <- rnorm(10000, 5, 5)
+y <- 1 + 0.5*x + 0.3*z + e
+
+```
+
+# 4.7. Beta Coefficient (cont.)
+\footnotesize
+Assume that we had the n size of sample for each X, Z, and Y. It'd be great that we have larger sample, but let's compare each situation.\newline
+
+Now we are estimating a following model with each sample size we have:
+
+$$
+Y = \alpha + \beta_1X + \beta_2Z + \varepsilon
+$$
+
+Where $i=1,2,...,n$, $\beta_1$ is a parameter estimate for the coefficient of X (which is 0.5 but we don't know), and $\beta_2$ is a parameter estimate for the coefficient of Z (which is 0.3 but again we don't know), and $\varepsilon$ is an ideosyncratic error term. \newline
+
+Let's make a data frame before running a regression.
+
+```{r}
+data <- data.frame(y=y, x=x, z=z)
+```
+
+
+# 4.7. Beta Coefficient (cont.)
+\scriptsize
+
+1) When n = 10
+
+\tiny
+```{r}
+
+sampledata <- dplyr::sample_n(data, 10)
+
+ols <- lm(y ~ x + z, data=sampledata)
+summary(ols)
+```
+
+# 4.7. Beta Coefficient (cont.)
+\scriptsize
+
+2) When n = 30
+
+\tiny
+```{r}
+
+sampledata <- dplyr::sample_n(data, 30)
+
+ols <- lm(y ~ x + z, data=sampledata)
+summary(ols)
+```
+
+# 4.7. Beta Coefficient (cont.)
+\footnotesize
+Again, don't get lured by the stars- remember our true parameters and see how these estimates are correct:
+
+```{r}
+pe <- coefficients(ols)
+vc <- vcov(ols)
+coefs <- mvrnorm(10000, pe, vc)
+mean(coefs[,2])
+quantile(coefs[,2], c(0.025, 0.975))
+```
+
+
+# 4.7. Beta Coefficient (cont.)
+\scriptsize
+3) When n = 100
+
+\tiny
+```{r}
+sampledata <- dplyr::sample_n(data, 100)
+
+ols <- lm(y ~ x + z, data=sampledata)
+summary(ols)
+```
+
+
+# 4.7. Beta Coefficient (cont.)
+\scriptsize
+Now it gets much closer to the population parameters. But consider the next example: \newline
+
+4) When n = 100, but without z
+
+\tiny
+```{r}
+sampledata <- dplyr::sample_n(data, 100)
+ols <- lm(y ~ x, data=sampledata)
+summary(ols)
+```
+
+
+# Conclusion
+
+Probability and statistical theory helps us examine whether the relationship between X and Y we found using the sample also exists in the population level. \newline
+
+
+
+
+

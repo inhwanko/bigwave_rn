@@ -1,0 +1,525 @@
+---
+title: 'BRN Research Methods Workshop 3'
+subtitle: 3. OLS vs MLE- A Gateway to Generalized Linear Model
+author: Inhwan Ko (Univ. of Washington, Seattle)
+date: "July 29th, 2021"
+classoption: xcolor=dvipsnames
+output: 
+  beamer_presentation: 
+    colortheme: dolphin
+    fonttheme: professionalfonts
+    includes:
+      in_header: header.tex
+    theme: Boadilla
+keep_tex: true
+---
+
+```{r setup, include=FALSE}
+# tinytex::tlmgr_update()
+# tinytex:::install_prebuilt()
+options(tinytex.verbose = TRUE)
+```
+
+# Contents
+
+1. Gauss-Markov Assumptions \newline
+2. Introduction to Maximum Likelihood Estimation \newline
+3. Generalized Linear Models \newline
+
+
+# Review Questions
+
++ What is the Law of Large Numbers? \newline
++ What is the Central Limit Theorem? \newline
++ What is p-value?\newline
++ What is confidence interval?\newline
++ What is the standard error of the regression ($\sigma^2$?)\newline
++ What is the square root of the mean of the squared errors (RMSE)?\newline
+
+# Refresher
+
+
+# Good Beta, Bad Beta
+
+A good beta estimator should have three characteristics: \newline
+
+1. No bias \newline
+2. Efficiency \newline
+3. Consistency \newline
+
+Let's take a look at each.
+
+
+# Unbiased Estimator
+
+Bias can be formally written as:
+
+$$
+\mathbb{E}(\hat{\beta}-\beta)
+$$
+
+That is: how much is the estimate $\hat{\beta}$ expected to be different from the true parameter $\beta$? \newline
+
+The more unbiased an estimator is, the closer it is to the true parameter.
+
+
+# Efficient Estimator
+\scriptsize
+If we were to take multiple times of sample and derive a beta estimate, \newline
+
+how often do we get the estimate that is close to the true parameter? \newline
+
+This is the question of efficiency: remember, "how often". So we need to consider not only the bias but also the variance of estimator.\newline
+
+We calculate efficiency with mean squared error:\newline
+
+$$
+\text{MSE}
+=\frac{1}{n}\text{RSS}
+=\mathbb{E}[(\beta-\hat{\beta})^2] 
+= Var(\hat{\beta}) + \text{Bias}
+$$
+
+If there is no bias, then MSE reduces to var($\hat{\beta}$).
+
+
+# Consistent Estimator
+
+An estimator is consistent when bias converges to zero as $N \rightarrow \infty$.\newline
+
+
+Although this sounds unquestionably clear, there are some cases where bias does not coverge to zero even though the sample size approaches infinity. \newline
+
+Yet, not a big concern relative to the two earlier concepts. 
+
+
+# Unbiasedness and Efficiency
+\scriptsize
+It is happy to have an unbiased and efficient estimator all the time. But it is not possible always. What do we mean by having (un)biased and (in)efficient estimator?\newline
+
+Let's say there is a sniper trying to practice in a shooting range. The sniper is the best on earth- as long as the rifle has no problem, the sniper will always send the bullets to the center.\newline
+
+But let's say the rifle may have two problems: ACOG(advanced combat optical gunsight) and gun barrel.\newline
+
+ACOG: relates to unbiasedness\newline
+Gun barrel: relates to efficiency\newline
+
+If a sniper shoots with good ACOG (unbiased) but bad barrel (inefficient), although the sniper will correctly aim at the bull's eye, the shot group will scatter. Nevertheless, on average a sniper has aimed at the bull's eye. \newline
+
+If a sniper shoots with bad ACOG (biased) but good barrel (efficient), the sniper's aim will be incorrect but the shot group will relatively less scatter.\newline
+
+
+# Gauss-Markov Assumptions for Linear Regression
+\scriptsize
+Even if our sample is representative of the population and the model is correctly specified (meaning we don't have any pre-treatment bias), there are still a few problems for conducting linear regression safely. \newline
+
+They relate to the key assumptions of linear regression to have "Best Linear Unbiased and Efficient" estimate, or BLUE. Those assumptions are: \newline
+
+1. No perfect collinearity\newline
+2. Exogenous covariates\newline
+3. Mean zero \newline
+4. Homoskedasticity\newline
+5. No error correlation\newline
+6. Non-normal disturbances\newline
+
+Let's take a look at each. 
+
+
+# No Perfect Collinearity
+
+Perfect collinearity occurs when $X'X$ is singular.\newline
+
+If this happens, $|X'X|=0$ (determinant is zero), and $\beta$ cannot be defined (since $\beta=(X'X)^{-1}X'Y$). \newline
+
+But no worries, usually R or other stat tools will automatically drop a few covariates to way around this issue.
+
+# Endogeneity & Exogeneity
+
+Our linear regression in matrix form, $Y=X\beta+\epsilon$ implies that $Y$ is endogenous to $X$. This means that $Y$ is determined by $X$ as its systematic component. \newline
+
+In other words, $X$ is exogenous to $Y$ as it is assumed to cause $Y$, not caused by $Y$. That is, all variance of $X$ must be independent from $Y$ while all variance of $Y$ must be solely dependent upon $X$.\newline
+
+This second GM assumption is violated when the relationship between $X$ and $Y$ switches- especially when we cannot identify correctly whether X or Y is the cause of the other. $\mathbb{E}(x_i,e_i)\neq 0$
+
+**Violating this will give us biased and inconsistent estimator.**
+
+
+# Mean Zero
+
+Mean zero means $\mathbb{E}(\epsilon)=0$. This is because we assume that:
+
+$$
+\mathbb{E}(\text{y}) = X\beta
+$$
+
+
+**Violating this will give us biased and inconsistent estimator.**
+
+
+# Homoskedasticity
+
+Homoskedasticity means the diagonal elements of $\Sigma$ are not the same. Therefore:
+
+$$
+\Sigma 
+=
+\begin{bmatrix}
+\sigma_1^2 & 0 & \cdots & 0 \\
+0 & \sigma_2^2  & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & \sigma_n^2 \\
+\end{bmatrix}
+$$
+
+This means that how far each individual's observed outcome, $y_i$, is from the expected outcome predicted from the model, $\hat{y}$, is different across individuals. \newline
+
+If this happens, our linear regression will ignore why each individual has different distance between the predicted line and its observed value and instead **produce an inefficient (but unbiased) estimator**. This situation is called "heteroskedasticity".
+
+
+# No error correlation
+
+Errors should not have correlation with each other. Formally, $\mathbb{E}(\varepsilon_i, \varepsilon_j)=0$. If this happens along with heteroskedasticity, let's see what happens to our $\Sigma$.
+
+$$
+\Sigma 
+=
+\begin{bmatrix}
+\sigma_1^2 & \sigma_{12} & \cdots & \sigma_{1n} \\
+\sigma_{21} & \sigma_2^2  & \cdots & \sigma_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+\sigma_{n1} & \sigma_{n2} & \cdots & \sigma_n^2 \\
+\end{bmatrix}
+$$
+
+**Violating this too will give us unbiased yet inefficient estimator.**
+
+
+# Non-Normal Disturbances
+
+Relatively simple, this formally writes: $\epsilon \sim N(0,\sigma^2)$. If this occurs, unless $N \rightarrow \infty$ our standard error will be biased.
+
+
+# Regression? 
+
+Recall that "regression" implies there is an assumption that something many "regress" towards a certain value.\newline
+
+And those most likely regress toward the "mean" value.\newline Also recall that the regression coefficients are "conditional means" ($\mathbb{E}(Y|X, \text{while other variables held constant})$).\newline
+
+If we do not know those conditional means ex ante, we need to estimate, and the logic of estimation was to calculate the value that minimizes the error. \newline
+
+In order for such a beta coefficient to be BLUE, the model needs to satisfy the GM assumptions. However, what if such assumptions are not met?\newline
+
+
+# Maximum Likelihood Estimation (MLE)
+
+Recall we used a partial derivation to find the beta coefficient, $\beta$, that minimizes the residual sum of squares, $\sum_{i=1}^n \varepsilon_i^2$. \newline
+
+Instead, in MLE, we *maximize* something.\newline
+
+And we maximize the **likelihood**.\newline
+
+*Likelihood* of what?
+
+
+
+# Maximum Likelihood Estimation (MLE)
+\scriptsize
+
+Remember that we understand our model to consist of two components:\newline
+
+1. Stochastic component \newline
+2. Systematic component \newline
+
+In OLS, we minimized our stochatic component to find the coefficient.\newline
+In MLE, we maximize the *likelihood* of our systematic component.\newline
+
+To write both components into functional forms:\newline
+
+1. Stochastic component: $\text{y} \sim f(\mu, \alpha)$\newline
+2. Systematic component: $\mathbb{\mu} \sim g(X, \beta)$\newline
+
+In MLE, let's denote our estimates ($\beta, \sigma^2$) as $\theta$. We need to maximize the likelihood of $\theta$ given that we have observations, y. \newline
+
+So we maximize $P(\theta|\text{y})$.
+
+
+# Bayesian Approach
+
+Using *Bayes Rule*, we know that:\newline
+
+$$
+P(\theta|\text{y}) = \frac{P(\theta)P(\text{y}|\theta)}{P(\text{y})}
+$$
+
+In Bayesian analysis, we (subjectively) guess what the $P(\theta)$ was before we collected the data, y. Then we calculate $P(\text{y}|\theta)$ to calculate $P(\theta|\text{y})$.\newline
+
+# Likelihood Approach
+\scriptsize
+However, in MLE, we consider $P(\theta)$ as something we cannot know. Thus:
+
+$$
+\begin{aligned}
+P(\theta|\text{y}) = \mathcal{L}(\theta|\text{y})&= \frac{P(\theta)}{P(\text{y})}P(\text{y}|\theta)\\
+&= k(\text{y}) \times P(\text{y}|\theta)\\
+&\propto P(\text{y}|\theta)
+\end{aligned}
+$$
+
+Note that $P(\theta|\text{y})$ is now denoted as $\mathcal{L}(\theta|\text{y})$. This indicates the likelihood of $\theta$ given our observation, y. \newline
+
+Although we don't know the $k(\text{y})$, we know that the likelihood is proportional to the probability of having our observation given our estimates, $P(\text{y}|\theta)$. This is something we can calculate from our data. \newline
+
+Hence, we maximize the likelihood by maximizing its proportionate, $P(\text{y}|\theta)$.
+
+
+# Flexibility of MLE
+
+In OLS, we assumed that our observation and error terms asymptotically follow the Normal distribution.\newline
+
+In MLE, we do not have to. Instead, we can assume them to follow various probabilistic distributions we know.\newline
+
++ If our y follows the Normal: $P(\text{y}_i|\theta_i)=f\mathcal{N}(\text{y}_i|\mu_i, \sigma^2)$.\newline
++ If our y follows the Bernoulli: $P(\text{y}_i|\theta)=f _{Bern} \normalsize (\pi_i)$.\newline
++ If our y follows the Poisson: $P(\text{y}_i|\theta)=f _{Pois} \normalsize (\lambda_i)$.
++ And more....
+
+
+
+# Link Function
+
+Link function translates our expected value of Y into the systematic component of our model, which is:
+
+$$
+\beta_0 + \beta_1X_1 + \beta_2X_2 + \dots + \beta_kX_k = X\beta
+$$
+
+For instance, in logit regression, our link function is:
+
+$$
+log(\frac{\pi_i}{1-\pi_i}) = X_i\beta
+$$
+
+This may seem familiar for those who have already used logit regression in one of their previous studies, but any thoughts on what this **actually** means?
+
+
+# From MLE to Link Function: A Case of Logit
+\scriptsize
+
+Let's say our observation, y, follows the Bernoulli distribution. In other words, it is a random variable, either 0 or 1, drawn from the population that follows the Bernoulli distribution. \newline
+
+We know that our first observation, $y_1$, is a function of this Bernoulli distribution:
+
+$$
+P(y_1|\pi_1) = f _{Bern} \normalsize (\pi_1)
+$$
+
+So is our second observation, $y_2$.
+
+$$
+P(y_2|\pi_2) = f _{Bern} \normalsize (\pi_2)
+$$
+
+# From MLE to Link Function: A Case of Logit
+\scriptsize
+
+Their joint probability will be:
+
+$$
+P(y_1, y_2|\pi_1, \pi_2) = f _{Bern} \normalsize (\pi_1) \times f _{Bern} \normalsize (\pi_2)
+$$
+
+And the joint probability of all observations will be:
+
+$$
+\begin{aligned}
+P(y_1, y_2, \dots, y_i|\pi_1, \pi_2, \dots, \pi_i) &= f _{Bern} \normalsize (\pi_1) \times f _{Bern} \normalsize (\pi_2) \times \dots \ f _{Bern} \normalsize (\pi_i) \\
+&=\prod_{i=1}^n f _{Bern} \normalsize (\pi_i)\\
+&=\prod_{i=1}^n \pi^{y_i}(1-\pi_i)^{n-y_i} 
+\end{aligned}
+$$
+
+Where $\pi_i$ is the probability that $y_i=1$.
+
+
+
+# From MLE to Link Function: A Case of Logit
+\scriptsize
+
+Since it's hard to calculate the product of multiple exponents, we take the log:
+
+$$
+\begin{aligned}
+log [P(y_1, y_2, \dots, y_i|\pi_1, \pi_2, \dots, \pi_i)]
+&=log [ \prod_{i=1}^n \pi^{y_i}(1-\pi_i)^{n-y_i} ]\\
+&=\sum_i^n[y_i log(\pi_i)] - \sum_i^n[y_i log(1-\pi_i)] + n\sum_i^n log(1-\pi_i)\\
+&=\sum_i^n[y_i log(\frac{\pi_i}{1-\pi_i})] + n\sum_i^n log(1-\pi_i)
+\end{aligned}
+$$
+
+# From MLE to Link Function: A Case of Logit
+\scriptsize
+
+Now, we need to estimate $log (\frac{\pi_i}{1-\pi_i})$. In fact, this is a logged odds ratio:\newline
+
+Odds ratio, $\frac{\pi}{1-\pi}$ indicates the probability of an event A occurs rather than does not occur, if the probability of an event A is $\pi$.\newline
+
+For instance, imagine you bet in a horse racing and your horse wins under 75% probability. Its odds ratio of winning is $0.75/1-0.75 = 0.75/0.25 = 3$. This indicates that the horse wins the race 3 times more likely than does not win. In our daily language, the horse wins 3 out of 4 games. \newline
+
+The logged odds ratio is the **link function** of the logit regression. Therefore:\newline
+
+$$
+log (\frac{\pi_i}{1-\pi_i}) = X_i\beta = \beta_0 + \beta_1X_1 + \beta_2X_2 + \dots + \beta_iX_i
+$$
+
+That is, we want our model's systematic component to calculate the logged odds ratio of the probability that our dependent variable y is 1. 
+
+
+
+# From Link Function to MLE: A Case of Logit
+\scriptsize
+
+Now, come back to the likelihood:
+
+$$
+\begin{aligned}
+log\mathcal{L}(\pi_i|y_i) & \propto log P(y_i|\pi_i)\\
+&=\sum_i^n[y_i log(\frac{\pi_i}{1-\pi_i})] + \sum_i^n log(1-\pi_i)
+\end{aligned}
+$$
+
+And also:
+
+$$log (\frac{\pi_i}{1-\pi_i}) = X_i\beta$$
+$$\pi_i = \frac{e^{X_i\beta}}{1+e^{X_i\beta}}$$
+
+Therefore, our final problem is to find $\pi_i$ that maximizes $logP(y_i|\pi_i)$ which is proportional to the log likelihood, and then put that $\pi_i$ into either one of two equations above and conduct partial derivative to obtain each beta coefficient estimate ($\beta_1, \beta_2, \dots, \beta_k$).
+
+
+# Poisson Regression
+\scriptsize
+
+Now, depending on our assumption on the distribution of our dependent variable, we can conduct MLE in various ways. If our dependent variable is a count variable (i.e. the number of civil war occurence in a country), we assume that it follows the Poisson distribution, therefore: 
+
+$$
+\begin{aligned}
+P(y_1, y_2, \dots, y_i|\lambda_1, \lambda_2, \dots, \lambda_i) &= f _{Pois} \normalsize (\lambda_1) \times f _{Pois} \normalsize (\lambda_2) \times \dots \ f _{Pois} \normalsize (\lambda_i) \\
+&=\prod_{i=1}^n f _{Pois} \normalsize (\lambda_i)\\
+&=\prod_{i=1}^n \frac{{\lambda^n}e^{-\lambda}}{n!}
+\end{aligned}
+$$
+
+And we take the same step as we did in the case of logit. Let's not bother repeating them for now...
+
+
+# Interpretation of Odds Ratio 
+
+Remember, odds ratio $\neq$ OLS coefficients. Also, we want to know how much 1 unit increase in $x$ changes the odds ratio, which is:
+
+$$\frac{\text{odds}(x+1)}{\text{odds}(x)}$$
+
+To interpret our model results using any regressions whose link function relates to odds ratio, we exponentiate the model result:
+
+$$
+e^{\hat{\beta}}
+$$
+
+And this equals $\frac{\text{odds}(x+1)}{\text{odds}(x)}$. I will show why.
+
+# Interpretation of Odds Ratio 
+\scriptsize
+For example, if our true model is $y_i=\beta_0+\beta_1x_i+e_i$, $\pi_i$ will look like:
+
+$$\text{odds}(x) = \frac{\pi_i}{1-\pi_i}=e^{\beta_0+\beta_1x_i}$$
+
+Let's denote this as $\text{odds}(x)$. If we let $x_i$ to increase by 1 unit:
+
+$$
+\begin{aligned}
+\text{odds}(x+1) &= e^{\beta_0+\beta_1(x_i+1)} \\
+&=e^{\beta_0+\beta_1x_i} \times e^{\beta_1} \\ 
+&=\text{odds}(x) \times e^{\beta_1}
+\end{aligned}
+$$
+
+# Interpretation of Odds Ratio 
+
+Therefore, we can calculate below:
+$$
+\frac{\text{odds}(x+1)}{\text{odds}(x)}
+=\frac{\text{odds}(x)\times e^{\beta_1}}{\text{odds}(x)}
+=e^{\beta_1}
+$$
+
+The same logic applies if we add more beta coefficients. Therefore, we need to exponentiate our beta from the model results using any regressions whose link function relates to odds ratio.  \newline
+
+Binary and count models (i.e. logit, probit, poisson, negative binomial) all use odds ratio. 
+
+
+# 95% Confidence Interval of Odds Ratio 
+\scriptsize
+We judge whether our beta coefficient is significant at 95% confidence level by checking if its odds ratio has 95% confidence interval over/below zero.\newline
+
+We calculate the 95% confidence interval of odds ratio as follows:\newline
+
+1. Calculate a 95% confidence interval of $\hat{\beta}$. \newline
+
+$$
+(\hat{\beta}-1.96 \times \hat{\sigma_\hat{\beta}},  \hat{\beta}+1.96 \times \hat{\sigma_\hat{\beta}})
+$$
+
+2. Exponentiate both ends of the 95% confidence interval of $\hat{\beta}$.
+
+$$(e^{\hat{\beta}-1.96 \times \hat{\sigma_\hat{\beta}}},  e^{\hat{\beta}+1.96 \times \hat{\sigma_\hat{\beta}}})$$
+How do we interpret if the $95\%$ confidence interval is over zero? Below zero?\newline
+
+What if it includes zero?
+
+
+# More Appropriate Model?- A Goodness of Fit
+
+After we specify multiple models, we need to decide which one fits our data the most.\newline
+
+This is called "a goodness of fit" test. We can take a look at three different statistics.\newline
+
+1. Likelihood-Ratio Test
+
+$$
+LR = (-2 \times logL_o) - (-2 \times logL_1)
+$$
+
+Where $L_o$ is the maximum likelihood of the reference model and $L_1$ is that of the tested model. LR follows a chi-square distribution, so we use this value to test if there is a statistically significant improvement with reference to that distribution.
+
+
+# More Appropriate Model?- A Goodness of Fit
+
+2. Akaike Information Criteria
+
+It is known that the maximum likelihood increases simply because parameters to be estimated increase in number. Therefore, we penalize it by modifying the likelihood as below, which gives us Akaike Information Criteria (AIC):
+
+$$
+AIC = 2k - 2logL
+$$
+Where $k$ is the number of parameters in our model.
+
+
+# More Appropriate Model?- A Goodness of Fit
+
+
+3. Error-based criterion: SER, RSME, MAE
+\scriptsize
+
+Or simply, we can use RSME as a reference. After we conduct MLE, we get the parameter estimate, therefore we can also get $\hat{y}$. This means we can calculate below:
+
+$$
+\mathbb{E}((y-\hat{y})^2) = \mathbb{E}(\epsilon'\epsilon) =  \frac{1}{n}\sum_{i=1}^n\varepsilon_i^2 = \sigma^2
+$$
+
+As we all know, this is the standard error of the regression. Its root is the RMSE (Square root of the mean of the squared errors). Or, we can try:
+
+$$
+\mathbb{E}(|y-\hat{y}|) = \mathbb{E}(|\epsilon'\epsilon|) =  \frac{1}{n}\sum_{i=1}^n|\varepsilon_i|
+$$
+
+This is called a mean absolute error. 
+
+

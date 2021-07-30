@@ -49,7 +49,7 @@ $$
 when we define both parameters as:
 
 $$
-\mu_i = \mathbf{x}_i\beta, \ \ \sigma^2_i = \mathbb{exp}(\mathbf{x_i}\gamma)
+\mu_i = \mathbf{x}_i\beta, \ \ \sigma^2_i = \mathrm{exp}(\mathbf{x_i}\gamma)
 $$
 
 this is now heteroskedastic Normal, which we cannot model with OLS assumptions. The MLE for the heteroskedastic Normal should be:
@@ -283,24 +283,24 @@ $$
 y_i \sim f_{Bern}(\pi_i)
 $$
 $$
-\pi_i = \mathbb{logit}^{-1}(X_i\beta) = \frac{e^{X_i\beta}}{1+e^{X_i\beta}} = \frac{1}{1+e^{-X_i\beta}}
+\pi_i = \mathrm{logit}^{-1}(X_i\beta) = \frac{e^{X_i\beta}}{1+e^{X_i\beta}} = \frac{1}{1+e^{-X_i\beta}}
 $$
 
 The MLE for the logit model is as follows:
 
 $$
 \begin{aligned}
-\mathcal{L}(\pi|\mathbb{y}) & \propto \prod^n_{i=1}\pi_i^{y_i}(1-\pi_i)^{1-y_i} \\
-\mathcal{L}(\beta|\mathbb{y}) & \propto \prod^n_{i=1}(\frac{1}{1+\mathbb{exp}(-\mathbb{x}_i\beta)})^{y_i}(1-\frac{1}{1+\mathbb{exp}(-\mathbb{x}_i\beta)})^{1-y_i} \\
-\mathcal{L}(\beta|\mathbb{y}) & \propto \prod^n_{i=1}(1+\mathbb{exp}(-\mathbb{x}_i\beta))^{-y_i}(1+\mathbb{exp}(\mathbb{x}_i\beta))^{-(1-y_i)} \\
-\mathbb{log}\mathcal{L}(\beta|\mathbb{y}) & \propto \sum^n_{i=1}y_i\mathbb{log}(1+\mathbb{exp}(-\mathbb{x}_i\beta))-(1-y_i)\mathbb{log}(1+\mathbb{exp{(\mathbb{x}_i\beta)}})
+\mathcal{L}(\pi|\mathrm{y}) & \propto \prod^n_{i=1}\pi_i^{y_i}(1-\pi_i)^{1-y_i} \\
+\mathcal{L}(\beta|\mathrm{y}) & \propto \prod^n_{i=1}(\frac{1}{1+\mathrm{exp}(-\mathrm{x}_i\beta)})^{y_i}(1-\frac{1}{1+\mathrm{exp}(-\mathrm{x}_i\beta)})^{1-y_i} \\
+\mathcal{L}(\beta|\mathrm{y}) & \propto \prod^n_{i=1}(1+\mathrm{exp}(-\mathrm{x}_i\beta))^{-y_i}(1+\mathrm{exp}(\mathrm{x}_i\beta))^{-(1-y_i)} \\
+\mathrm{log}\mathcal{L}(\beta|\mathrm{y}) & \propto \sum^n_{i=1}y_i\mathrm{log}(1+\mathrm{exp}(-\mathrm{x}_i\beta))-(1-y_i)\mathrm{log}(1+\mathrm{exp{(\mathrm{x}_i\beta)}})
 \end{aligned}
 $$
 
 Let's just compare the results between GLM and MLE. Let's say we have a true model of a Bernoulli random variable which is:
 
 $$
-\pi_i = \mathbb{logit}^{-1}(0.5 + x_{1i} +1.5x_{2_i}) = \frac{e^{X_i\beta}}{1+e^{X_i\beta}} = \frac{1}{1+e^{-X_i\beta}}
+\pi_i = \mathrm{logit}^{-1}(0.5 + x_{1i} +1.5x_{2_i}) = \frac{e^{X_i\beta}}{1+e^{X_i\beta}} = \frac{1}{1+e^{-X_i\beta}}
 $$
 
 ```{r}

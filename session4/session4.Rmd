@@ -18,6 +18,13 @@ keep_tex: true
 # tinytex::tlmgr_update()
 # tinytex:::install_prebuilt()
 options(tinytex.verbose = TRUE)
+library(tinytex)
+library(knitr)
+library(ggplot2)
+library(tidyverse)
+library(MASS)
+library(simcf)
+library(ggplot2)
 ```
 
 # Contents
@@ -259,9 +266,9 @@ However, in MLE, we consider $P(\theta)$ as something we cannot know. Thus:
 
 $$
 \begin{aligned}
-P(\theta|\text{y}) = \mathcal{L}(\theta|\text{y})&= \frac{P(\theta)}{P(\text{y})}P(\text{y}|\theta)\\
-&= k(\text{y}) \times P(\text{y}|\theta)\\
-&\propto P(\text{y}|\theta)
+P(\theta|\text{y}) &= \frac{P(\theta)}{P(\text{y})}P(\text{y}|\theta)\\
+\mathcal{L}(\theta|\text{y}) &= k(\text{y}) \times P(\text{y}|\theta)\\
+\mathcal{L}(\theta|\text{y}) & \propto P(\text{y}|\theta)
 \end{aligned}
 $$
 
@@ -284,25 +291,7 @@ In MLE, we do not have to. Instead, we can assume them to follow various probabi
 + And more....
 
 
-
-# Link Function
-
-Link function translates our expected value of Y into the systematic component of our model, which is:
-
-$$
-\beta_0 + \beta_1X_1 + \beta_2X_2 + \dots + \beta_kX_k = X\beta
-$$
-
-For instance, in logit regression, our link function is:
-
-$$
-log(\frac{\pi_i}{1-\pi_i}) = X_i\beta
-$$
-
-This may seem familiar for those who have already used logit regression in one of their previous studies, but any thoughts on what this **actually** means?
-
-
-# From MLE to Link Function: A Case of Logit
+# Bernoulli Distribution
 \scriptsize
 
 Let's say our observation, y, follows the Bernoulli distribution. In other words, it is a random variable, either 0 or 1, drawn from the population that follows the Bernoulli distribution. \newline
@@ -319,7 +308,7 @@ $$
 P(y_2|\pi_2) = f _{Bern} \normalsize (\pi_2)
 $$
 
-# From MLE to Link Function: A Case of Logit
+# Bernoulli Distribution
 \scriptsize
 
 Their joint probability will be:
@@ -334,7 +323,7 @@ $$
 \begin{aligned}
 P(y_1, y_2, \dots, y_i|\pi_1, \pi_2, \dots, \pi_i) &= f _{Bern} \normalsize (\pi_1) \times f _{Bern} \normalsize (\pi_2) \times \dots \ f _{Bern} \normalsize (\pi_i) \\
 &=\prod_{i=1}^n f _{Bern} \normalsize (\pi_i)\\
-&=\prod_{i=1}^n \pi^{y_i}(1-\pi_i)^{n-y_i} 
+&=\prod_{i=1}^n \pi^{y_i}(1-\pi_i)^{1-y_i} 
 \end{aligned}
 $$
 
@@ -342,30 +331,140 @@ Where $\pi_i$ is the probability that $y_i=1$.
 
 
 
-# From MLE to Link Function: A Case of Logit
+# Bernoulli Distribution
 \scriptsize
 
 Since it's hard to calculate the product of multiple exponents, we take the log:
 
 $$
 \begin{aligned}
-log [P(y_1, y_2, \dots, y_i|\pi_1, \pi_2, \dots, \pi_i)]
-&=log [ \prod_{i=1}^n \pi^{y_i}(1-\pi_i)^{n-y_i} ]\\
-&=\sum_i^n[y_i log(\pi_i)] - \sum_i^n[y_i log(1-\pi_i)] + n\sum_i^n log(1-\pi_i)\\
-&=\sum_i^n[y_i log(\frac{\pi_i}{1-\pi_i})] + n\sum_i^n log(1-\pi_i)
+\mathrm{log} [P(y_1, y_2, \dots, y_i|\pi_1, \pi_2, \dots, \pi_i)]
+&=log [ \prod_{i=1}^n \pi^{y_i}(1-\pi_i)^{1-y_i} ]\\
+&=\sum_i^n[y_i \mathrm{log}\pi_i] - \sum_i^n[y_i \mathrm{log}(1-\pi_i)] + \sum_i^n \mathrm{log}(1-\pi_i)\\
+&=\sum_i^n[y_i \mathrm{log} \pi_i + (1-y_i)\mathrm{log}(1-\pi_i)]
 \end{aligned}
 $$
+Therefore, we find $\pi$ which maximizes this log-likelihood function. 
+
+
+# Bernoulli Experiment
+
+If we assume that $y_i (i=1,2,...,8)$ is defined as:
+
+```{r}
+y <- c(1,0,0,1,0,0,0,0)
+y
+```
+
+which follows a Bernoulli distribution with its parameter $\pi$,
+
+$$
+y_i \sim f_{Bern}(\pi_i)
+$$
+
+# Bernoulli Experiment
+
+We can write down its likelihood function:
+
+$$
+\begin{aligned}
+L(\pi_i|y_i) & \propto P(y_i|\pi_i) \\
+& = f_{Bern}(\pi_1) \times f_{Bern}(\pi_2) \times \dots \times f_{Bern}(\pi_8) \\
+& = \prod_{i=1}^8f_{Bern}(\pi_i) \\
+& = \prod_{i=1}^8 \pi_i^{y_i}(1-\pi_i)^{1-y_i}
+\end{aligned}
+$$
+Therefore, plugging in our data will change it into:
+
+$$
+L(\pi_i|y_i) \propto\pi^2\times(1-\pi)^6
+$$
+
+
+# Bernoulli Experiment
+\scriptsize
+```{r}
+pi <- seq(from=0, to=1, by=0.01)
+
+L <- function(pi){
+  val= (pi^2)*((1-pi)^6)
+  return(val)
+} # transform the likelihood equation into an R function
+
+likelihood <- data.frame(pi=pi, y=L(pi)) %>% 
+  arrange(desc(y)) # arrange by making y decrease to find the ML and MLE
+
+head(likelihood) # pi=0.25 is the MLE 
+```
+
+# Bernoulli Experiment
+\scriptsize
+```{r echo=FALSE}
+  
+ggplot(data=likelihood, aes(x=pi,y=y)) +
+  geom_line() +
+  labs(x="Bernoulli parameter", y="Likelihood",
+       title="Maximum likelihood per each possible Bernoulli parameter, [0,1]") +
+  geom_segment(aes(x=0.25, y=-Inf, xend=0.25, yend=max(y), color="red2")) +
+  geom_segment(aes(x=-Inf, y=max(y), xend=0.25, yend=max(y), color="red2")) +
+  geom_text(x=0.40, y=0.01112	, label="(0.25, 0.01112)", color="red") +
+  theme(legend.position="none")
+
+```
+
+
+# Link Function
+
+Link function translates our expected value of Y into the systematic component of our model, which is:
+
+$$
+\beta_0 + \beta_1X_1 + \beta_2X_2 + \dots + \beta_kX_k = X_i\beta
+$$
+
+For instance, in logit regression, our link function is an inverse logit function
+
+$$
+\pi_i = \mathrm{logit}^{-1}(X_i\beta) = \frac{\mathrm{exp}(X_i\beta)}{1+\mathrm{exp}(X_i\beta)} = \frac{1}{1+\mathrm{exp}(-X_i\beta)}
+$$
+
+Why do we use an inverse logit function?
 
 # From MLE to Link Function: A Case of Logit
 \scriptsize
 
-Now, we need to estimate $log (\frac{\pi_i}{1-\pi_i})$. In fact, this is a logged odds ratio:\newline
+$$
+\begin{aligned}
+L(\pi | y) \propto & \prod^n_{i=1} \pi_i^{y_i} (1-\pi_i)^{1-y_i} \\
+L(\beta | y) \propto & \prod^n_{i=1} (\frac{1}{1+\mathrm{exp}(-X_i\beta)})^{y_i} (1-(\frac{1}{1+\mathrm{exp}(-X_i\beta)}))^{1-y_i} \\
+L(\beta | y) \propto & \prod^n_{i=1} (1+\mathrm{exp}(-X_i\beta))^{-y_i} (1+\mathrm{exp}(-X_i\beta))^{-(1-y_i)} \\
+\mathrm{log}L(\beta | y) \propto & \sum^n_{i=1} [-y_i \mathrm{log}(1+\mathrm{exp}(-X_i\beta)) - (1-y_i)\mathrm{log}[(1+\mathrm{exp}(-X_i\beta))]
+\end{aligned} 
+$$
+
+# From MLE to Link Function: A Case of Logit
+
+Now note that:
+
+$$
+\pi = \textrm{logit}^{-1}(X_i\beta) \ \rightarrow \ \mathrm{logit}(\pi) = X_i\beta
+$$
+
+Therefore:
+
+$$
+\mathrm{log}(\frac{\pi}{1-\pi}) = X_i\beta 
+$$
+
+Now, we need to estimate $log (\frac{\pi_i}{1-\pi_i})$. In fact, this is a logged **odds ratio.**
+
+# From MLE to Link Function: A Case of Logit
+\scriptsize
 
 Odds ratio, $\frac{\pi}{1-\pi}$ indicates the probability of an event A occurs rather than does not occur, if the probability of an event A is $\pi$.\newline
 
 For instance, imagine you bet in a horse racing and your horse wins under 75% probability. Its odds ratio of winning is $0.75/1-0.75 = 0.75/0.25 = 3$. This indicates that the horse wins the race 3 times more likely than does not win. In our daily language, the horse wins 3 out of 4 games. \newline
 
-The logged odds ratio is the **link function** of the logit regression. Therefore:\newline
+The logged odds ratio of $\pi$ is the logit function of $\pi$ which is then linked to the linear form of $X_i\beta$. Therefore:\newline
 
 $$
 log (\frac{\pi_i}{1-\pi_i}) = X_i\beta = \beta_0 + \beta_1X_1 + \beta_2X_2 + \dots + \beta_iX_i
@@ -373,42 +472,6 @@ $$
 
 That is, we want our model's systematic component to calculate the logged odds ratio of the probability that our dependent variable y is 1. 
 
-
-
-# From Link Function to MLE: A Case of Logit
-\scriptsize
-
-Now, come back to the likelihood:
-
-$$
-\begin{aligned}
-log\mathcal{L}(\pi_i|y_i) & \propto log P(y_i|\pi_i)\\
-&=\sum_i^n[y_i log(\frac{\pi_i}{1-\pi_i})] + \sum_i^n log(1-\pi_i)
-\end{aligned}
-$$
-
-And also:
-
-$$log (\frac{\pi_i}{1-\pi_i}) = X_i\beta$$
-$$\pi_i = \frac{e^{X_i\beta}}{1+e^{X_i\beta}}$$
-
-Therefore, our final problem is to find $\pi_i$ that maximizes $logP(y_i|\pi_i)$ which is proportional to the log likelihood, and then put that $\pi_i$ into either one of two equations above and conduct partial derivative to obtain each beta coefficient estimate ($\beta_1, \beta_2, \dots, \beta_k$).
-
-
-# Poisson Regression
-\scriptsize
-
-Now, depending on our assumption on the distribution of our dependent variable, we can conduct MLE in various ways. If our dependent variable is a count variable (i.e. the number of civil war occurence in a country), we assume that it follows the Poisson distribution, therefore: 
-
-$$
-\begin{aligned}
-P(y_1, y_2, \dots, y_i|\lambda_1, \lambda_2, \dots, \lambda_i) &= f _{Pois} \normalsize (\lambda_1) \times f _{Pois} \normalsize (\lambda_2) \times \dots \ f _{Pois} \normalsize (\lambda_i) \\
-&=\prod_{i=1}^n f _{Pois} \normalsize (\lambda_i)\\
-&=\prod_{i=1}^n \frac{{\lambda^n}e^{-\lambda}}{n!}
-\end{aligned}
-$$
-
-And we take the same step as we did in the case of logit. Let's not bother repeating them for now...
 
 
 # Interpretation of Odds Ratio 
@@ -445,9 +508,7 @@ $$
 
 Therefore, we can calculate below:
 $$
-\frac{\text{odds}(x+1)}{\text{odds}(x)}
-=\frac{\text{odds}(x)\times e^{\beta_1}}{\text{odds}(x)}
-=e^{\beta_1}
+\frac{\text{odds}(x+1)}{\text{odds}(x)}=\frac{\text{odds}(x)\times e^{\beta_1}}{\text{odds}(x)}=e^{\beta_1}
 $$
 
 The same logic applies if we add more beta coefficients. Therefore, we need to exponentiate our beta from the model results using any regressions whose link function relates to odds ratio.  \newline
@@ -457,22 +518,58 @@ Binary and count models (i.e. logit, probit, poisson, negative binomial) all use
 
 # 95% Confidence Interval of Odds Ratio 
 \scriptsize
-We judge whether our beta coefficient is significant at 95% confidence level by checking if its odds ratio has 95% confidence interval over/below zero.\newline
 
-We calculate the 95% confidence interval of odds ratio as follows:\newline
+We judge whether our beta coefficient is significant at 95% confidence level by checking if its odds ratio has 95% confidence interval over/below zero.  
 
-1. Calculate a 95% confidence interval of $\hat{\beta}$. \newline
+We calculate the 95% confidence interval of odds ratio as follows:  
+
+1. Calculate a 95% confidence interval of $\hat{\beta}$.  
 
 $$
-(\hat{\beta}-1.96 \times \hat{\sigma_\hat{\beta}},  \hat{\beta}+1.96 \times \hat{\sigma_\hat{\beta}})
+{\hat{\beta}-1.96\times{\hat{\sigma_{\hat{\beta}}}}}\text{,} {\ \hat{\beta}+1.96\times{\hat{\sigma_{\hat{\beta}}}}}
 $$
 
-2. Exponentiate both ends of the 95% confidence interval of $\hat{\beta}$.
+2. Exponentiate both ends of the 95% confidence interval of $\hat{\beta}$.  
 
-$$(e^{\hat{\beta}-1.96 \times \hat{\sigma_\hat{\beta}}},  e^{\hat{\beta}+1.96 \times \hat{\sigma_\hat{\beta}}})$$
-How do we interpret if the $95\%$ confidence interval is over zero? Below zero?\newline
+$$
+e^{{\hat{\beta}-1.96\times{\hat{\sigma_{\hat{\beta}}}}}}\text{,} \ e^{{\hat{\beta}+1.96\times{\hat{\sigma_{\hat{\beta}}}}}}
+$$
 
-What if it includes zero?
+How do we interpret if the 95% confidence interval is over zero? Below zero?  
+
+What if it includes zero?  
+
+# Binomial Distribution
+\scriptsize
+
+Bernoulli distribution is a part of a binomial distribution. For instance:
+
+$$
+\frac{m!}{y!(m-y)!}\pi^{y}(1-\pi)^{m-y}
+$$
+
+is a probability density function of a binomial distribution, where $y=0,1,2...,m$. And Bernoulli distribution is a binomial distribution where $y=0,1$ and therefore $m=1$. It reduces into:
+
+$$
+\frac{1!}{y!(1-y)!}\pi^{y}(1-\pi)^{m-y} = \pi^y(1-\pi)^{(1-y)}
+$$
+
+
+# Poisson Distribution
+\scriptsize
+
+Now, depending on our assumption on the distribution of our dependent variable, we can conduct MLE in various ways. If our dependent variable is a count variable (i.e. the number of civil war occurence in a country), we assume that it follows the Poisson distribution, therefore: 
+
+$$
+\begin{aligned}
+P(y_1, y_2, \dots, y_i|\lambda_1, \lambda_2, \dots, \lambda_i) &= f _{Pois} \normalsize (\lambda_1) \times f _{Pois} \normalsize (\lambda_2) \times \dots \ f _{Pois} \normalsize (\lambda_i) \\
+&=\prod_{i=1}^n f _{Pois} \normalsize (\lambda_i)\\
+&=\prod_{i=1}^n \frac{{\lambda^n}e^{-\lambda}}{n!}
+\end{aligned}
+$$
+
+And we take the same step as we did in the case of logit. I will show you (outside of the slide) that the poisson and binomial are actually related with each other. 
+
 
 
 # More Appropriate Model?- A Goodness of Fit
@@ -511,7 +608,7 @@ Where $k$ is the number of parameters in our model.
 Or simply, we can use RSME as a reference. After we conduct MLE, we get the parameter estimate, therefore we can also get $\hat{y}$. This means we can calculate below:
 
 $$
-\mathbb{E}((y-\hat{y})^2) = \mathbb{E}(\epsilon'\epsilon) =  \frac{1}{n}\sum_{i=1}^n\varepsilon_i^2 = \sigma^2
+\mathbb{E}((y-\hat{y})^2) = \mathbb{E}(\epsilon'\epsilon) = \frac{1}{n}\sum_{i=1}^n\varepsilon_i^2 = \sigma^2
 $$
 
 As we all know, this is the standard error of the regression. Its root is the RMSE (Square root of the mean of the squared errors). Or, we can try:
